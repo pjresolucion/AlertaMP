@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CARVIL Technology Solutions</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+<style>
+/* Mantiene tu estilo original */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+:root { --bg-color:#fff; --text-color:#1a1a1a; --primary-color:#3b82f6; --secondary-color:#e0e7ff; --accent-color:#22c55e; --card-bg:rgba(249,250,251,0.95); }
+body.dark { --bg-color:#121212; --text-color:#eee; --primary-color:#60a5fa; --secondary-color:#1e1e1e; --accent-color:#22c55e; --card-bg:rgba(41,41,61,0.95);}
+body { font-family:'Inter',sans-serif; background:var(--bg-color); color:var(--text-color); margin:0; padding-top:60px; transition:background 0.4s,color 0.4s; overflow-x:hidden;}
+header { position:fixed; top:0; width:100%; background-color:var(--bg-color); display:flex; justify-content:space-between; align-items:center; padding:0.8rem 2rem; box-shadow:0 2px 5px rgba(0,0,0,0.1); z-index:1000; border-bottom:1px solid #ddd;}
+.logo-title { font-weight:700; display:flex; align-items:center; gap:0.5rem; font-size:1.2rem; color:var(--text-color);}
+.logo-title img{height:36px;}
+.menu-principal { display:flex; gap:1.5rem;}
+.menu-link { color:var(--text-color); text-decoration:none; font-weight:600; transition:color 0.3s;}
+.menu-link:hover { color:var(--primary-color);}
+.social-icons a { color:var(--text-color); margin-left:1rem;}
+#toggle-theme{background:none;border:none;cursor:pointer;font-size:1.4rem;color:var(--text-color);}
+#chat-container{position:fixed;bottom:0;left:0;right:0;top:60px;display:flex;flex-direction:column;justify-content:flex-end;pointer-events:auto;max-width:100vw;overflow-x:hidden;}
+#chat-messages{flex:1;padding:15px;overflow-y:auto;background:var(--card-bg);font-size:14px;width:100%;box-sizing:border-box;}
+.message-line{margin-bottom:10px;}
+.message-line strong{color:var(--primary-color);}
+#chat-input-area{display:flex;padding:10px 15px;background:var(--card-bg);border-top:1px solid #ddd;align-items:center;width:100%;box-sizing:border-box;gap:8px;}
+#file-upload{display:none;}
+#attach-btn{background:var(--secondary-color);border:none;color:var(--text-color);font-size:18px;padding:8px 10px;border-radius:8px;cursor:pointer;}
+#attach-btn:hover{background:var(--primary-color);color:#fff;}
+#chat-input{flex:1;min-width:0;padding:10px 12px;border-radius:8px;border:1px solid #ccc;outline:none;font-size:14px;background:#fff;color:#000;box-sizing:border-box;}
+body.dark #chat-input{background:#2a2a3c;color:#eee;border:1px solid #555;}
+#chat-send{background:var(--primary-color);color:#fff;border:none;padding:10px 16px;border-radius:8px;cursor:pointer;font-weight:600;}
+#chat-send:hover{background:#2563eb;}
+.bot-option-btn{margin:4px 4px 4px 0;padding:6px 10px;border-radius:6px;border:1px solid var(--primary-color);background:var(--secondary-color);cursor:pointer;font-size:13px;}
+.bot-option-btn:hover{background:var(--primary-color);color:#fff;}
+@media(max-width:768px){#chat-input-area{padding:8px;}#chat-input{font-size:13px;}#attach-btn,#chat-send{padding:6px 10px;}}
+</style>
+</head>
+<body>
+<header>
+  <button id="toggle-theme" aria-label="Cambiar tema"><i class="fas fa-moon icon-theme"></i></button>
+  <div class="logo-title"><img src="logosf.png" alt="Logo" />CARVIL Technology Solutions</div>
+  <nav class="menu-principal"><a href="index.html#contacto" class="menu-link">Contacto</a></nav>
+  <div class="social-icons">
+    <a href="https://www.facebook.com/profile.php?id=61577767590965" target="_blank"><i class="fab fa-facebook-f"></i></a>
+    <a href="https://x.com/carvilsas" target="_blank"><i class="fab fa-twitter"></i></a>
+    <a href="https://www.linkedin.com/in/eduardo-carballo-gais-b70273a1/" target="_blank"><i class="fab fa-linkedin-in"></i></a>
+  </div>
+  <select id="language-selector"><option value="es" selected>ES</option><option value="en">EN</option></select>
+</header>
+
+<div id="chat-container">
+  <div id="chat-messages">
+    <div class="message-line"><strong>Bot:</strong> ¡Hola! Soy tu asistente para crear tu Agente Virtual. Vamos a hacerlo paso a paso.</div>
+  </div>
+  <div id="chat-input-area">
+    <button id="attach-btn">+</button>
+    <input type="file" id="file-upload"/>
+    <input type="text" id="chat-input" placeholder="Escribe tu mensaje..." />
+    <button id="chat-send">Enviar</button>
+  </div>
+</div>
+
+<script>
+const messagesContainer = document.getElementById('chat-messages');
+const inputField = document.getElementById('chat-input');
+const sendBtn = document.getElementById('chat-send');
+const attachBtn = document.getElementById('attach-btn');
+const fileUpload = document.getElementById('file-upload');
+const toggleTheme = document.getElementById('toggle-theme');
+
+toggleTheme.addEventListener('click', ()=>document.body.classList.toggle('dark'));
+attachBtn.addEventListener('click', ()=>fileUpload.click());
+
+function addMessage(text,sender){
+  const div=document.createElement('div');
+  div.classList.add('message-line');
+  div.innerHTML=`<strong>${sender==='user'?'Tú':'Bot'}:</strong> ${text}`;
+  messagesContainer.appendChild(div);
+  messagesContainer.scrollTop=messagesContainer.scrollHeight;
+}
+
+async function sendMessage(customText){
+  const text=customText||inputField.value.trim();
+  const file=fileUpload.files[0];
+  if(!text && !file) return;
+
+  if(text) addMessage(text,'user');
+  if(file) addMessage("Archivo enviado: " + file.name, 'user');
+
+  inputField.value='';
+  fileUpload.value='';
+
+  const typing=document.createElement('div');
+  typing.classList.add('message-line');
+  typing.innerHTML='<em>Bot escribiendo...</em>';
+  messagesContainer.appendChild(typing);
+  messagesContainer.scrollTop=messagesContainer.scrollHeight;
+
+  try{
+    let res;
+    if(file){
+      const formData=new FormData();
+      formData.append('file',file);
+      if(text) formData.append('message',text);
+      // Nota: esto enviará el archivo como $binary.file en n8n
+      res=await fetch('https://mali-windsor-helped-divide.trycloudflare.com/webhook/av_2', { method:'POST', body:formData });
+    } else {
+      // Envío solo texto como JSON
+      res=await fetch('https://mali-windsor-helped-divide.trycloudflare.com/webhook/av_2', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({message:text})
+      });
+    }
+
+    const data=await res.json();
+    messagesContainer.removeChild(typing);
+    if(data.reply) addMessage(data.reply,'bot');
+
+  }catch(e){
+    messagesContainer.removeChild(typing);
+    addMessage('Error de conexión','bot');
+    console.error(e);
+  }
+}
+
+sendBtn.addEventListener('click',()=>sendMessage());
+inputField.addEventListener('keypress',e=>{if(e.key==='Enter') sendMessage();});
+</script>
+</body>
+</html>
